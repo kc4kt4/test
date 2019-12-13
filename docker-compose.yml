@@ -1,9 +1,8 @@
 version: '3'
 services:
-  postgres:
-    image: "postgres"
+  mongo:
+    image: "mongo:3.6"
     ports:
-      - "5432:5432"
+      - "27017:27017"
     environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_USER=vasilevskiy
+      - MONGO_INITDB_DATABASE=vasilevskiy

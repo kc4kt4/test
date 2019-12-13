@@ -6,10 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.test.context.jdbc.Sql
-import org.springframework.test.context.jdbc.SqlGroup
 import org.springframework.web.client.RestTemplate
 import ru.kc4kt4.students.test.model.StudentDto
+import ru.kc4kt4.students.test.model.entity.Student
 import ru.kc4kt4.students.test.model.repository.StudentRepository
 
 class StudentControllerTest : TestApplicationTests() {
@@ -22,10 +21,6 @@ class StudentControllerTest : TestApplicationTests() {
     lateinit var studentRepository: StudentRepository
 
     @Test
-    @SqlGroup(value = [
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD),
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    ])
     fun createUser_success() {
         val response = restTemplate.postForEntity("$url/", HttpEntity(dto), String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
@@ -33,13 +28,10 @@ class StudentControllerTest : TestApplicationTests() {
                 .hasSize(1)
                 .element(0)
                 .matches { it.id == response.body!! }
+        clean()
     }
 
     @Test
-    @SqlGroup(value = [
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD),
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    ])
     fun createUser_badRequest() {
         val badDto = StudentDto(dto.givenName, "", dto.middleName, dto.age, dto.course)
         val response = restTemplate.postForEntity("$url/", HttpEntity(badDto), String::class.java)
@@ -47,51 +39,48 @@ class StudentControllerTest : TestApplicationTests() {
     }
 
     @Test
-    @SqlGroup(value = [
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        Sql(statements = ["insert into public.student values('$id', 'name', 'surname','mname',2,3)"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    ])
     fun delete_success() {
+        initStudent()
         assertThat(studentRepository.findAll()).hasSize(1)
         restTemplate.delete("$url/$id")
         assertThat(studentRepository.findAll()).hasSize(0)
     }
 
     @Test
-    @SqlGroup(value = [
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        Sql(statements = ["insert into public.student values('$id', 'name', 'surname','mname',2,3)"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    ])
     fun delete_unknownId() {
+        initStudent()
         assertThat(studentRepository.findAll()).hasSize(1)
-        val response = restTemplate.exchange("$url/ewq", HttpMethod.DELETE, HttpEntity.EMPTY, Unit::class.java)
+        restTemplate.exchange("$url/ewq", HttpMethod.DELETE, HttpEntity.EMPTY, Unit::class.java)
         assertThat(studentRepository.findAll()).hasSize(1)
+        clean()
     }
 
     @Test
-    @SqlGroup(value = [
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        Sql(statements = ["insert into public.student values('$id', 'name', 'surname', 'mname', 2, 3)"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    ])
     fun getById_success() {
+        initStudent()
         val response = restTemplate.getForEntity("$url/$id", StudentDto::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(studentRepository.findAll())
                 .hasSize(1)
                 .element(0)
                 .matches { it.id == id }
+        clean()
     }
 
     @Test
-    @SqlGroup(value = [
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        Sql(statements = ["insert into public.student values('$id', 'name', 'surname', 'mname', 2, 3)"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        Sql(statements = ["delete from public.student"], executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    ])
     fun getById_unknownId_noContent() {
+        initStudent()
         val response = restTemplate.getForEntity("$url/ewq", StudentDto::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+        clean()
+    }
+
+    private fun initStudent() {
+        studentRepository.save(Student(id, "name", "surname", "mname", 2, 3))
+    }
+
+    private fun clean() {
+        studentRepository.deleteAll()
     }
 
     companion object {
