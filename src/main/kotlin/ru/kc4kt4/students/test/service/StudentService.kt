@@ -1,4 +1,4 @@
-package ru.kc4kt4.students.test
+package ru.kc4kt4.students.test.service
 
 import org.springframework.stereotype.Service
 import ru.kc4kt4.students.test.model.StudentDto

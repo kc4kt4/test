@@ -1,4 +1,4 @@
-package ru.kc4kt4.students.test
+package ru.kc4kt4.students.test.controller
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import ru.kc4kt4.students.test.model.StudentDto
 import ru.kc4kt4.students.test.model.entity.Student
+import ru.kc4kt4.students.test.service.StudentService
 import javax.validation.Valid
 
 @RestController

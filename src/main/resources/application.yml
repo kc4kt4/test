@@ -2,24 +2,14 @@ server:
   port: 8081
 
 spring:
-#  flyway:
-#    locations: classpath:migration
-
-#  jpa:
-#    database: postgresql
-#    show-sql: true
-    #    generate-ddl: false
   data:
     mongodb:
       uri: mongodb://localhost:27017/vasilevskiy
 
-#  datasource:
-#    platform: postgres
-#    url: jdbc:postgresql://localhost:5432/postgres
-#    username: vasilevskiy
-#    password: password
-
-
 logging:
   level:
     ru.kc4kt4: debug
+    com: debug
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+    file: app.log
